@@ -51,17 +51,22 @@ pub fn run_harmony(
     let theta = Array1::from(config.resolved_theta(phi.n_cov));
     let sigma = Array1::from(vec![config.sigma; k]);
     let pr_b = phi.pr_b();
-    let lambda = config
-        .lambda
-        .clone()
-        .unwrap_or_else(|| default_lambda(phi.b));
-    if lambda.len() != phi.b + 1 {
-        return Err(HarmonyError::InvalidConfig(format!(
-            "lambda must have length B+1 = {}; got {}",
-            phi.b + 1,
-            lambda.len()
-        )));
-    }
+    let lambda = match &config.lambda {
+        None => default_lambda(phi.b),
+        Some(lam) if lam.len() == 1 => {
+            let mut v = vec![lam[0]; phi.b + 1];
+            v[0] = 1e-8;
+            v
+        }
+        Some(lam) if lam.len() == phi.b + 1 => lam.clone(),
+        Some(lam) => {
+            return Err(HarmonyError::InvalidConfig(format!(
+                "lambda must have length 1 or B+1 = {}; got {}",
+                phi.b + 1,
+                lam.len()
+            )));
+        }
+    };
 
     let z_orig = z.to_owned();
     let mut z_cos = l2_normalize_cols(z.view());

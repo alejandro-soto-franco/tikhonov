@@ -14,3 +14,7 @@ name       = "_core"
 crate-type = ["cdylib"]
 
 [dependencies]
+tikhonov    = { path = "../tikhonov", version = "0.1.0" }
+ndarray     = { workspace = true }
+pyo3        = { workspace = true }
+numpy       = { workspace = true }

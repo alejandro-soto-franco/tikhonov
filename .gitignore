@@ -15,6 +15,7 @@ build/
 wheels/
 *.abi3.so
 *.so
+.venv/
 
 # Node (none expected, but harmless)
 node_modules/
