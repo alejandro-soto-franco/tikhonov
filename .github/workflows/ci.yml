@@ -46,22 +46,16 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libhdf5-dev pkg-config
 
-      - name: Install libhdf5 (macos)
-        if: runner.os == 'macOS'
-        run: |
-          brew install hdf5 pkg-config
-          echo "HDF5_DIR=$(brew --prefix hdf5)" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=$(brew --prefix hdf5)/lib/pkgconfig" >> $GITHUB_ENV
-          echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix hdf5)/lib" >> $GITHUB_ENV
-
-      - name: Install libhdf5 (windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          C:\msys64\usr\bin\bash.exe -lc "pacman -S --noconfirm --needed mingw-w64-x86_64-hdf5 mingw-w64-x86_64-pkgconf"
-          echo "HDF5_DIR=C:\msys64\mingw64" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --workspace --all-features
+
+      - name: Test full workspace (ubuntu)
+        if: runner.os == 'Linux'
+        run: cargo test --workspace --all-features
+
+      - name: Test core crate only (macos, windows)
+        if: runner.os != 'Linux'
+        run: cargo test -p tikhonov --all-features
+      # `tikhonov-cli` depends on `hdf5-metno-sys 0.11.2` which cannot parse
+      # HDF5 2.x headers shipped by Homebrew / msys2 as of 2026-04. Linux
+      # tests the full workspace; the algorithm core is exercised on all
+      # three OSes here.
