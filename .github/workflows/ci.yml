@@ -59,3 +59,25 @@ jobs:
       # HDF5 2.x headers shipped by Homebrew / msys2 as of 2026-04. Linux
       # tests the full workspace; the algorithm core is exercised on all
       # three OSes here.
+
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.85.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: Swatinem/rust-cache@v2
+      - name: Install Python tooling
+        run: pip install --upgrade pip maturin pytest numpy pandas anndata
+      - name: Build + install wheel
+        working-directory: crates/tikhonov-py
+        run: maturin develop --release
+      - name: Run pytest
+        working-directory: crates/tikhonov-py
+        run: pytest -v
