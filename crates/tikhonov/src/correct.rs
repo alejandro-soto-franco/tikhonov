@@ -16,10 +16,16 @@ use faer::linalg::solvers::Solve;
 use faer::mat::Mat;
 use ndarray::{Array2, ArrayView1, ArrayView2};
 
-/// Default ridge penalty per row of `Phi_moe`: `[0.0, 1.0, 1.0, ..., 1.0]`.
+/// Default ridge penalty per row of `Phi_moe`: `[eps, 1.0, 1.0, ..., 1.0]`.
+///
+/// Harmony-R uses `lambda[0] = 0` for the intercept, but we tolerate a tiny
+/// non-zero pivot floor (`1e-8`) to keep the Cholesky stable on pathological
+/// tiny datasets where a cluster may receive zero mass after a sharp softmax.
+/// The intercept row of `W` is zeroed out after the solve, so this choice
+/// does not affect the corrected embedding.
 pub fn default_lambda(b: usize) -> Vec<f64> {
     let mut v = vec![1.0; b + 1];
-    v[0] = 0.0;
+    v[0] = 1e-8;
     v
 }
 
@@ -152,9 +158,11 @@ mod tests {
     use ndarray::array;
 
     #[test]
-    fn default_lambda_has_zero_intercept() {
+    fn default_lambda_has_tiny_intercept_jitter() {
         let l = default_lambda(3);
-        assert_eq!(l, vec![0.0, 1.0, 1.0, 1.0]);
+        assert_eq!(l.len(), 4);
+        assert!(l[0] > 0.0 && l[0] < 1e-6);
+        assert_eq!(&l[1..], &[1.0, 1.0, 1.0]);
     }
 
     #[test]
