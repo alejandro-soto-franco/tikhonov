@@ -58,12 +58,13 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             manylinux: "off"
-          - os: macos-13
-            target: x86_64-apple-darwin
-            manylinux: "off"
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             manylinux: "off"
+      # x86_64-apple-darwin dropped for v0.1.0: macos-13 GitHub runners
+      # are effectively deprecated and rarely allocate. Intel Mac users
+      # install from source (`pip install tikhonov --no-binary tikhonov`)
+      # until we wire a cross-compile path.
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
