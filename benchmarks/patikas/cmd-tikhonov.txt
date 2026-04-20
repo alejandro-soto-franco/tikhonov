@@ -1,0 +1,31 @@
+# Patikas-style sweep: {50,100,200,400,800}B batches × {1,2}M cells × 4 replicates × 20 PCs × 10 iters × 16 cpus.
+# Tail (4M, 8M, 16M) omitted until we have a machine with more RAM.
+# Each line is passed to `tikhonov`; `--input` is prepended by run_tikhonov.sh.
+-d tahoe-profile -p 20 -i 10 -f sample -r 1 -m 50B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 1 -m 1M  -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 2 -m 50B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 2 -m 1M  -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 3 -m 50B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 3 -m 1M  -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 4 -m 50B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 4 -m 1M  -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 1 -m 100B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 1 -m 2M   -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 2 -m 100B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 2 -m 2M   -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 3 -m 100B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 3 -m 2M   -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 4 -m 100B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 4 -m 2M   -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 1 -m 200B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 2 -m 200B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 3 -m 200B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 4 -m 200B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 1 -m 400B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 2 -m 400B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 3 -m 400B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 4 -m 400B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 1 -m 800B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 2 -m 800B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 3 -m 800B -n 16
+-d tahoe-profile -p 20 -i 10 -f sample -r 4 -m 800B -n 16
