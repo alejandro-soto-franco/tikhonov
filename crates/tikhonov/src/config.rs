@@ -122,14 +122,12 @@ impl HarmonyConfig {
     }
 
     /// Resolve [`HarmonyConfig::nclust`] for a dataset of `n` cells.
-    #[allow(dead_code)]
-    pub(crate) fn resolved_nclust(&self, n: usize) -> usize {
+    pub fn resolved_nclust(&self, n: usize) -> usize {
         self.nclust.unwrap_or_else(|| (n / 30).clamp(1, 100))
     }
 
     /// Resolve [`HarmonyConfig::theta`] for `n_cov` covariates.
-    #[allow(dead_code)]
-    pub(crate) fn resolved_theta(&self, n_cov: usize) -> Vec<f64> {
+    pub fn resolved_theta(&self, n_cov: usize) -> Vec<f64> {
         match self.theta.len() {
             0 => vec![2.0; n_cov],
             1 => vec![self.theta[0]; n_cov],

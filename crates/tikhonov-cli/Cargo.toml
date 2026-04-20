@@ -7,9 +7,25 @@ license       = { workspace = true }
 repository    = { workspace = true }
 authors       = { workspace = true }
 description   = "CLI for Harmony2 single-cell integration; reads .h5ad, writes .h5ad + Patikas-schema JSON"
+keywords      = ["bioinformatics", "single-cell", "harmony", "cli"]
+categories    = ["command-line-utilities", "science"]
 
 [[bin]]
 name = "tikhonov"
 path = "src/main.rs"
 
 [dependencies]
+tikhonov     = { path = "../tikhonov", version = "0.1.0" }
+ndarray      = { workspace = true }
+rayon        = { workspace = true }
+thiserror    = { workspace = true }
+serde        = { workspace = true }
+serde_json   = { workspace = true }
+hdf5-metno   = { workspace = true }
+clap         = { workspace = true }
+md5          = { workspace = true }
+
+[dev-dependencies]
+tempfile   = "3"
+assert_cmd = "2"
+predicates = "3"
