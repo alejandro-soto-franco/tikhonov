@@ -3,6 +3,8 @@
 
 pub mod config;
 pub mod error;
+pub mod phi;
 
 pub use config::HarmonyConfig;
 pub use error::HarmonyError;
+pub use phi::Phi;
