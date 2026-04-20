@@ -46,7 +46,7 @@ jobs:
         run: |
           if ! out=$(cargo publish -p tikhonov --token "$CARGO_REGISTRY_TOKEN" 2>&1); then
             echo "$out"
-            echo "$out" | grep -q "already uploaded" && { echo "tikhonov already on crates.io; skipping"; exit 0; }
+            echo "$out" | grep -qE "already (uploaded|exists on crates\.io)" && { echo "tikhonov already on crates.io; skipping"; exit 0; }
             exit 1
           fi
           echo "$out"
@@ -58,7 +58,7 @@ jobs:
         run: |
           if ! out=$(cargo publish -p tikhonov-cli --token "$CARGO_REGISTRY_TOKEN" 2>&1); then
             echo "$out"
-            echo "$out" | grep -q "already uploaded" && { echo "tikhonov-cli already on crates.io; skipping"; exit 0; }
+            echo "$out" | grep -qE "already (uploaded|exists on crates\.io)" && { echo "tikhonov-cli already on crates.io; skipping"; exit 0; }
             exit 1
           fi
           echo "$out"
