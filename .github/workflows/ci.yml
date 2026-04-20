@@ -75,9 +75,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Install Python tooling
         run: pip install --upgrade pip maturin pytest numpy pandas anndata
-      - name: Build + install wheel
+      - name: Build wheel
         working-directory: crates/tikhonov-py
-        run: maturin develop --release
+        run: maturin build --release --out dist
+      - name: Install wheel
+        working-directory: crates/tikhonov-py
+        run: pip install --force-reinstall dist/*.whl
       - name: Run pytest
         working-directory: crates/tikhonov-py
         run: pytest -v
