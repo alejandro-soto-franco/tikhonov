@@ -3,6 +3,7 @@
 
 pub mod cluster;
 pub mod config;
+pub mod correct;
 pub mod embed;
 pub mod error;
 pub mod objective;
