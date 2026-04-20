@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - "v*"
+  # Manual dispatch lets us re-fire the release workflow against `main`
+  # when a previous run partially succeeded (e.g. crates.io published but
+  # PyPI upload failed). The crate-publish steps tolerate "already
+  # uploaded" errors so re-runs are idempotent.
+  workflow_dispatch: {}
 
 env:
   CARGO_TERM_COLOR: always
@@ -38,13 +43,25 @@ jobs:
       - name: Publish tikhonov (core)
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: cargo publish -p tikhonov --token "$CARGO_REGISTRY_TOKEN"
+        run: |
+          if ! out=$(cargo publish -p tikhonov --token "$CARGO_REGISTRY_TOKEN" 2>&1); then
+            echo "$out"
+            echo "$out" | grep -q "already uploaded" && { echo "tikhonov already on crates.io; skipping"; exit 0; }
+            exit 1
+          fi
+          echo "$out"
       - name: Wait for crates.io index to refresh
         run: sleep 60
       - name: Publish tikhonov-cli
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: cargo publish -p tikhonov-cli --token "$CARGO_REGISTRY_TOKEN"
+        run: |
+          if ! out=$(cargo publish -p tikhonov-cli --token "$CARGO_REGISTRY_TOKEN" 2>&1); then
+            echo "$out"
+            echo "$out" | grep -q "already uploaded" && { echo "tikhonov-cli already on crates.io; skipping"; exit 0; }
+            exit 1
+          fi
+          echo "$out"
 
   build-wheels:
     needs: verify-ci
@@ -118,11 +135,17 @@ jobs:
           pattern: wheels-*
           merge-multiple: true
       - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          gh release create "$TAG" \
-            --title "$TAG" \
-            --notes "Released to crates.io (tikhonov, tikhonov-cli) and PyPI (tikhonov). See CHANGELOG or commit history for details." \
-            wheels/*.whl
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; uploading wheels only."
+            gh release upload "$TAG" wheels/*.whl --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --notes "Released to crates.io (tikhonov, tikhonov-cli) and PyPI (tikhonov). See CHANGELOG or commit history for details." \
+              wheels/*.whl
+          fi
