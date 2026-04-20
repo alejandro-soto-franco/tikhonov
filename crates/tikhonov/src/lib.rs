@@ -4,6 +4,7 @@
 pub mod config;
 pub mod embed;
 pub mod error;
+pub mod objective;
 pub mod phi;
 
 pub use config::HarmonyConfig;
