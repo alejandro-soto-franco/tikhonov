@@ -89,6 +89,8 @@ jobs:
     needs: [verify-ci, build-wheels]
     runs-on: ubuntu-latest
     environment: pypi
+    permissions:
+      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -98,13 +100,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Publish to PyPI
-        uses: PyO3/maturin-action@v1
+      - name: Publish to PyPI (trusted publisher / OIDC)
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          command: upload
-          args: --non-interactive --skip-existing wheels/*.whl
-        env:
-          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: wheels
 
   github-release:
     needs: [publish-crates, publish-pypi]
