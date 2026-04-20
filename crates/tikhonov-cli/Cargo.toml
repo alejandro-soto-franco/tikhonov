@@ -9,6 +9,7 @@ authors       = { workspace = true }
 description   = "CLI for Harmony2 single-cell integration; reads .h5ad, writes .h5ad + Patikas-schema JSON"
 keywords      = ["bioinformatics", "single-cell", "harmony", "cli"]
 categories    = ["command-line-utilities", "science"]
+readme        = "README.md"
 
 [[bin]]
 name = "tikhonov"

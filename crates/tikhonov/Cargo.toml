@@ -10,7 +10,8 @@ description   = "Harmony2 single-cell data integration (pure Rust)"
 keywords      = ["bioinformatics", "single-cell", "harmony", "integration"]
 categories    = ["science"]
 documentation = "https://docs.rs/tikhonov"
-exclude       = ["tests/data/", "*.md"]
+readme        = "README.md"
+exclude       = ["tests/data/"]
 
 [package.metadata.docs.rs]
 features     = []
