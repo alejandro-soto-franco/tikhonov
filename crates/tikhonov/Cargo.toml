@@ -6,12 +6,30 @@ rust-version  = { workspace = true }
 license       = { workspace = true }
 repository    = { workspace = true }
 authors       = { workspace = true }
-description   = "Harmony2 single-cell data integration"
+description   = "Harmony2 single-cell data integration (pure Rust)"
 keywords      = ["bioinformatics", "single-cell", "harmony", "integration"]
 categories    = ["science"]
+documentation = "https://docs.rs/tikhonov"
+exclude       = ["tests/data/", "*.md"]
+
+[package.metadata.docs.rs]
+features     = []
+rustdoc-args = ["--cfg", "docsrs"]
 
 [lib]
 name       = "tikhonov"
 crate-type = ["rlib"]
 
 [dependencies]
+ndarray     = { workspace = true }
+rayon       = { workspace = true }
+thiserror   = { workspace = true }
+rand_chacha = { workspace = true }
+rand        = { workspace = true }
+serde       = { workspace = true }
+faer        = { workspace = true }
+
+[dev-dependencies]
+approx       = "0.5"
+ndarray-rand = "0.15"
+serde_json   = { workspace = true }
