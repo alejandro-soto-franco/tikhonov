@@ -1,0 +1,15 @@
+[package]
+name          = "tikhonov-cli"
+version       = { workspace = true }
+edition       = { workspace = true }
+rust-version  = { workspace = true }
+license       = { workspace = true }
+repository    = { workspace = true }
+authors       = { workspace = true }
+description   = "CLI for Harmony2 single-cell integration; reads .h5ad, writes .h5ad + Patikas-schema JSON"
+
+[[bin]]
+name = "tikhonov"
+path = "src/main.rs"
+
+[dependencies]

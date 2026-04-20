@@ -1,0 +1,41 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+
+# Python / maturin
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+wheels/
+*.abi3.so
+*.so
+
+# Node (none expected, but harmless)
+node_modules/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# CI / local only
+.env
+.env.local
+
+# Design artefacts — never committed in this public repo
+docs/superpowers/
+
+# Generated benchmarks output
+benchmarks/**/outs/
+benchmarks/**/results/*.json
+benchmarks/**/*.log
+
+# Golden data regeneration byproducts
+tests/data/golden/_regen/
