@@ -37,13 +37,13 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Publish tikhonov (core)
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: cargo publish -p tikhonov --token "$CARGO_REGISTRY_TOKEN"
       - name: Wait for crates.io index to refresh
         run: sleep 60
       - name: Publish tikhonov-cli
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: cargo publish -p tikhonov-cli --token "$CARGO_REGISTRY_TOKEN"
 
   build-wheels:
