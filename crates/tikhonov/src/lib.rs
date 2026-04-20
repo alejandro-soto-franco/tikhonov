@@ -1,6 +1,7 @@
 //! Tikhonov: pure-Rust Harmony2 single-cell integration.
 #![forbid(unsafe_code)]
 
+pub mod cluster;
 pub mod config;
 pub mod embed;
 pub mod error;
