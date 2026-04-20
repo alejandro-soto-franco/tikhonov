@@ -6,11 +6,13 @@ pub mod config;
 pub mod correct;
 pub mod embed;
 pub mod error;
+pub mod harmony;
 pub mod history;
 pub mod objective;
 pub mod phi;
 
 pub use config::HarmonyConfig;
 pub use error::HarmonyError;
+pub use harmony::{HarmonyResult, run_harmony};
 pub use history::{HarmonyHistory, HistoryEntry};
 pub use phi::Phi;
