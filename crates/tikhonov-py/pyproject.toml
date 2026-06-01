@@ -39,3 +39,6 @@ testpaths = ["tests"]
 markers   = [
     "integration: tests that require network or external data",
 ]
+
+[tool.pyrefly]
+# Enables full Pyrefly type checking; run with `uvc`. See ~/.claude/rules/pyrefly.md
