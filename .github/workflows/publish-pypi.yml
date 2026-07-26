@@ -1,0 +1,105 @@
+name: Publish PyPI
+
+# Fires once dist has built the binaries and published the GitHub release.
+#
+# IMPORTANT: PyPI trusted publishing is keyed to the workflow FILENAME. The
+# publisher for the `tikhonov` project must name publish-pypi.yml, not
+# release.yml, or the OIDC exchange is rejected. PyPI does not support
+# reusable workflows as a trusted publisher, so this job cannot be folded
+# back into release.yml as a called workflow.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish from (e.g. v0.1.0)"
+        required: true
+        type: string
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  build-wheels:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            manylinux: auto
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            manylinux: "off"
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            manylinux: "off"
+      # x86_64-apple-darwin dropped for v0.1.0: macos-13 GitHub runners
+      # are effectively deprecated and rarely allocate. Intel Mac users
+      # install from source (`pip install tikhonov --no-binary tikhonov`)
+      # until we wire a cross-compile path.
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+      - uses: dtolnay/rust-toolchain@1.85.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: Swatinem/rust-cache@v2
+      # tikhonov-py does not depend on hdf5-metno, so no HDF5 package is
+      # needed here. Only tikhonov-cli links it.
+      - name: Build abi3 wheel
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          working-directory: crates/tikhonov-py
+          args: --release --target ${{ matrix.target }} --out dist
+          manylinux: ${{ matrix.manylinux }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.target }}
+          path: crates/tikhonov-py/dist/
+
+  publish-pypi:
+    needs: build-wheels
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: wheels
+          pattern: wheels-*
+          merge-multiple: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Publish to PyPI (trusted publisher / OIDC)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: wheels
+          skip-existing: true
+
+  # dist creates the release and attaches the binaries. The wheels are added
+  # to the same release here so one tag has every artifact under it.
+  attach-wheels:
+    needs: publish-pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: wheels
+          pattern: wheels-*
+          merge-multiple: true
+      - name: Upload wheels to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: gh release upload "$TAG" wheels/*.whl --clobber --repo "$GITHUB_REPOSITORY"

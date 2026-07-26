@@ -1,0 +1,73 @@
+name: Publish crates
+
+# Fires once dist has built the binaries and published the GitHub release.
+# dist owns release.yml and the release itself; this workflow only pushes to
+# crates.io. Manual dispatch re-fires it against a tag when a previous run
+# partially succeeded, and every publish step tolerates "already uploaded",
+# so re-runs are idempotent.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish from (e.g. v0.1.0)"
+        required: true
+        type: string
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # Re-verify on the tagged commit. publish needs this, so a red gate stops
+  # anything reaching crates.io even though the GitHub release already exists.
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+      - uses: dtolnay/rust-toolchain@1.85.1
+        with:
+          components: rustfmt, clippy
+      - name: Install libhdf5
+        run: sudo apt-get update && sudo apt-get install -y libhdf5-dev pkg-config
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace --all-features
+
+  publish-crates:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+      - uses: dtolnay/rust-toolchain@1.85.1
+      - name: Install libhdf5
+        run: sudo apt-get update && sudo apt-get install -y libhdf5-dev pkg-config
+      - uses: Swatinem/rust-cache@v2
+      - name: Publish tikhonov (core)
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          if ! out=$(cargo publish -p tikhonov --token "$CARGO_REGISTRY_TOKEN" 2>&1); then
+            echo "$out"
+            echo "$out" | grep -qE "already (uploaded|exists on crates\.io)" && { echo "tikhonov already on crates.io; skipping"; exit 0; }
+            exit 1
+          fi
+          echo "$out"
+      - name: Wait for crates.io index to refresh
+        run: sleep 60
+      - name: Publish tikhonov-cli
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          if ! out=$(cargo publish -p tikhonov-cli --token "$CARGO_REGISTRY_TOKEN" 2>&1); then
+            echo "$out"
+            echo "$out" | grep -qE "already (uploaded|exists on crates\.io)" && { echo "tikhonov-cli already on crates.io; skipping"; exit 0; }
+            exit 1
+          fi
+          echo "$out"
