@@ -16,7 +16,7 @@ name = "tikhonov"
 path = "src/main.rs"
 
 [dependencies]
-tikhonov     = { path = "../tikhonov", version = "0.1.0" }
+tikhonov     = { path = "../tikhonov", version = "0.1.1" }
 ndarray      = { workspace = true }
 thiserror    = { workspace = true }
 serde        = { workspace = true }

@@ -1805,7 +1805,7 @@ dependencies = [
 
 [[package]]
 name = "tikhonov"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "approx",
  "faer",
@@ -1821,7 +1821,7 @@ dependencies = [
 
 [[package]]
 name = "tikhonov-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -1838,7 +1838,7 @@ dependencies = [
 
 [[package]]
 name = "tikhonov-py"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ndarray 0.17.2",
  "numpy",
