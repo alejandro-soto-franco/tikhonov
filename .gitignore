@@ -30,9 +30,6 @@ node_modules/
 .env
 .env.local
 
-# Design artefacts — never committed in this public repo
-docs/superpowers/
-
 # Generated benchmarks output
 benchmarks/**/outs/
 benchmarks/**/results/*.json
