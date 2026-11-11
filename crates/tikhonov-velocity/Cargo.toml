@@ -1,0 +1,14 @@
+[package]
+name          = "tikhonov-velocity"
+version       = { workspace = true }
+edition       = { workspace = true }
+rust-version  = { workspace = true }
+license       = { workspace = true }
+repository    = { workspace = true }
+authors       = { workspace = true }
+description   = "RNA velocity on neighbour graphs and its Hodge decomposition"
+publish       = false
+
+[dependencies]
+ndarray   = { workspace = true }
+rayon     = { workspace = true }
