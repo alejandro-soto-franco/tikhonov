@@ -162,7 +162,8 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 [[package]]
 name = "cartan-complex"
 version = "0.10.0"
-source = "git+https://github.com/alejandro-soto-franco/cartan?rev=58ad2fb5c37a7520cbd3efcf41eacd5d0ac70ec9#58ad2fb5c37a7520cbd3efcf41eacd5d0ac70ec9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d1bab3c370372deefc07deb196c8b2b955ca58074f508e38ab5ca83ec3780716"
 dependencies = [
  "faer 0.24.4",
  "rayon",

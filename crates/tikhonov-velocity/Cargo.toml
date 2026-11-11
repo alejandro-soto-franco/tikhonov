@@ -17,7 +17,7 @@ serde          = { workspace = true }
 serde_json     = { workspace = true }
 hdf5-metno     = { workspace = true }
 clap           = { workspace = true }
-cartan-complex = { git = "https://github.com/alejandro-soto-franco/cartan", rev = "58ad2fb5c37a7520cbd3efcf41eacd5d0ac70ec9" }
+cartan-complex = "0.10"
 
 [dev-dependencies]
 tempfile = "3"
