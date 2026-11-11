@@ -27,6 +27,14 @@ pub enum PipelineError {
     RowMismatch { x: usize, v: usize },
     #[error("fixture: {0}")]
     Fixture(String),
+    #[error(
+        "curl solve at fill {fill} stopped at relative residual {residual:e} after {iterations} iterations"
+    )]
+    CurlNotConverged {
+        fill: f64,
+        residual: f64,
+        iterations: usize,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -34,6 +42,7 @@ pub struct RunConfig {
     pub k: usize,
     pub n_pcs: usize,
     pub fills: Vec<f64>,
+    pub hodge: HodgeOptions,
 }
 
 impl Default for RunConfig {
@@ -42,6 +51,7 @@ impl Default for RunConfig {
             k: 15,
             n_pcs: 30,
             fills: vec![0.0, 0.25, 0.5, 0.75, 1.0],
+            hodge: HodgeOptions::default(),
         }
     }
 }
@@ -108,7 +118,6 @@ pub fn run(
     let base = Complex::new(n, edges.clone())?;
     let all_tri = triangles_of(&base);
     let fnorm = norm(&flow);
-    let opts = HodgeOptions::default();
 
     let mut fills = Vec::with_capacity(cfg.fills.len());
     for &fill in &cfg.fills {
@@ -124,7 +133,14 @@ pub fn run(
         };
         let n_triangles = tri.len();
         let complex = base.clone().with_triangles(tri)?;
-        let d = decompose(&complex, &flow, &opts)?;
+        let d = decompose(&complex, &flow, &cfg.hodge)?;
+        if !d.converged {
+            return Err(PipelineError::CurlNotConverged {
+                fill,
+                residual: d.curl_residual,
+                iterations: d.curl_iterations,
+            });
+        }
         let frac = |a: &[f64]| if fnorm > 0.0 { norm(a) / fnorm } else { 0.0 };
         fills.push(FillReport {
             fill,
@@ -185,6 +201,7 @@ mod tests {
             k: 5,
             n_pcs: 30,
             fills: vec![0.0],
+            ..RunConfig::default()
         };
         let rep = run(&path, &cfg, None).unwrap();
         assert_eq!(rep.n_cells, n);
@@ -203,6 +220,30 @@ mod tests {
     }
 
     #[test]
+    fn an_unconverged_curl_solve_is_an_error() {
+        let n = 60;
+        let x = Array2::from_shape_fn((n, 3), |(i, c)| {
+            let t = i as f64 / n as f64 * std::f64::consts::TAU;
+            [t.cos(), t.sin(), 0.01 * (i % 3) as f64][c]
+        });
+        let v = Array2::from_shape_fn((n, 3), |(i, c)| (i * 3 + c) as f64 * 0.01);
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("ring.h5ad");
+        write_h5ad(&path, &x, &v);
+        let mut cfg = RunConfig {
+            k: 5,
+            n_pcs: 30,
+            fills: vec![1.0],
+            ..RunConfig::default()
+        };
+        cfg.hodge.curl_max_iter = 1;
+        assert!(matches!(
+            run(&path, &cfg, None),
+            Err(PipelineError::CurlNotConverged { fill, .. }) if fill == 1.0
+        ));
+    }
+
+    #[test]
     fn a_partial_fill_needs_a_triangle_choice() {
         let x = Array2::from_shape_fn((8, 2), |(i, c)| (i * (c + 1)) as f64);
         let v = Array2::from_elem((8, 2), 1.0);
@@ -213,6 +254,7 @@ mod tests {
             k: 3,
             n_pcs: 2,
             fills: vec![0.5],
+            ..RunConfig::default()
         };
         assert!(matches!(
             run(&path, &cfg, None),

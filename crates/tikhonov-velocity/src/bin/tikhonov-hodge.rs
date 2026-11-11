@@ -43,6 +43,7 @@ fn main() -> ExitCode {
         k: cli.k,
         n_pcs: cli.n_pcs,
         fills,
+        ..RunConfig::default()
     };
     let t0 = Instant::now();
     let rep = match run(&cli.h5ad, &cfg, fx.as_ref().map(|f| &f.triangles)) {
